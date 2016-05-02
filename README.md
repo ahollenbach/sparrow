@@ -21,8 +21,10 @@ Alternatively, you'll have to follow instructions [here](https://pythonhosted.or
 ## Useful Links
 ### Documents
 [Progress Report](https://docs.google.com/document/d/1TBit5KAJ3NspUf_hseIyiyxuA9Sm01CT6yI5KNSzIpI/edit)
+
 [Design Diagram](https://docs.google.com/drawings/d/12q7JRJt6pI6HscYF3m-IuA76Mcdmzx_VhxJIZ2qQBoo/edit)
 
 ### Resources
 [Sparrow Talk](https://www.youtube.com/watch?v=A4k0WqjUY9A)
+
 [Pyro4 Tutorials](https://pythonhosted.org/Pyro4/tutorials.html)
