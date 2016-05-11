@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import socket
 from Worker import Worker
 import Pyro4
 try:
@@ -13,7 +14,7 @@ class Scheduler(object):
     METHOD_BATCH = "BATCH"
     METHOD_LATE = "BATCH+LATE_BINDING"
 
-    def __init__(self, scheduling_method=METHOD_RAND):
+    def __init__(self, scheduling_method=METHOD_RAND, nameserver_hostname="newyork"):
         self.scheduling_method = scheduling_method
         print("Scheduling method: ", self.scheduling_method)
 
@@ -21,7 +22,16 @@ class Scheduler(object):
         self.in_progress_jobs = {}
 
         # TODO temp, remove and distribute
-        self.worker = Worker(self)
+        # self.worker = Worker(self)
+        ns = Pyro4.locateNS(nameserver_hostname)
+        worker_dict = ns.list('sparrow.worker')
+        self.workers = []
+        for key in worker_dict:
+            self.workers.append(Pyro4.Proxy(worker_dict[key]))
+        print(self.workers)
+
+        #tmp
+        self.worker = self.workers[0]
 
     def schedule(self, job):
         """
@@ -50,6 +60,10 @@ class Scheduler(object):
 
 
 if __name__ == "__main__":
-    Pyro4.Daemon.serveSimple({
-        Scheduler(): "sparrow.scheduler"
-    })
+    hostname = socket.gethostname()
+    Pyro4.Daemon.serveSimple(
+        {
+            Scheduler(nameserver_hostname="arkansas"): "sparrow.scheduler"
+        },
+        host = hostname
+    )

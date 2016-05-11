@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import Pyro4
+import socket
 from time import sleep
 try:
     import queue  # py3
@@ -8,7 +9,7 @@ except ImportError:
     import Queue as queue  # py2
 
 class Worker(object):
-    def __init__(self, scheduler, late_binding=False):  # scheduler only temporary
+    def __init__(self, late_binding=False, nameserver_hostname="newyork"):  # scheduler only temporary
         """
         Creates a worker.
 
@@ -19,8 +20,12 @@ class Worker(object):
         self.late_binding = late_binding
         self.task_queue = queue.Queue()
 
-        # self.scheduler = Pyro4.core.Proxy("PYRONAME:sparrow.scheduler")
-        self.scheduler = scheduler
+        # Assume one scheduler for now
+        ns = Pyro4.locateNS(nameserver_hostname)
+        print(ns)
+        scheduler_uri = ns.list('sparrow.scheduler')["sparrow.scheduler"]
+        self.scheduler = Pyro4.core.Proxy(scheduler_uri)
+        print(self.scheduler)
 
     def add_task(self, job_id, task_id, duration):
         """
@@ -54,6 +59,10 @@ class Worker(object):
         return True
 
 if __name__ == "__main__":
-    Pyro4.Daemon.serveSimple({
-        Worker(): "sparrow.worker"
-    })
+    hostname = socket.gethostname()
+    Pyro4.Daemon.serveSimple(
+        {
+            Worker(nameserver_hostname="arkansas"): "sparrow.worker"
+        },
+        host = hostname
+    )

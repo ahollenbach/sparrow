@@ -6,8 +6,8 @@ from Job import Job
 
 class SparrowClient():
     def __init__(self):
-        # self.scheduler = Pyro4.core.Proxy("PYRONAME:sparrow.scheduler")
-        self.scheduler = Scheduler()
+        self.scheduler = Pyro4.core.Proxy("PYRONAME:sparrow.scheduler")
+        # self.scheduler = Scheduler()
 
     def shutdown(self):
         # TODO Do this cleaner?
