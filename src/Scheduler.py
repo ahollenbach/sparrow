@@ -29,13 +29,16 @@ class Scheduler(object):
         self.name_server = Pyro4.locateNS(nameserver_hostname)
 
     def update_workers(self):
-        """ Can get very inefficient, fix """
+        # TODO can get very inefficient
+        # TODO doesn't handle node failure
+
+        # List all sparrow workers (i.e. sparrow.worker.arizona)
         worker_dict = self.name_server.list('sparrow.worker')
         self.workers = []
         for key in worker_dict:
             self.workers.append(Pyro4.Proxy(worker_dict[key]))
-        print(self.workers)
-        # TODO doesn't handle node failure
+
+        print("Workers", self.workers)
 
     def schedule(self, job):
         """
@@ -63,7 +66,7 @@ class Scheduler(object):
             print("Task not found in ", self.in_progress_jobs[job_id])
             return
 
-        print(job_id, task_id)
+        print("Worker completed (job,task) ", job_id, task_id)
         self.in_progress_jobs[job_id].tasks.pop(task_id)
 
         if len(self.in_progress_jobs[job_id].tasks) == 0:
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     hostname = socket.gethostname()
     Pyro4.Daemon.serveSimple(
         {
-            Scheduler(nameserver_hostname="arkansas"): "sparrow.scheduler"
+            Scheduler(): "sparrow.scheduler"
         },
         host = hostname
     )

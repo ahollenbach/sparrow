@@ -60,6 +60,7 @@ class Worker(object):
         # "Execute" our task
         print("Executing <JobId:%d TaskId:%d Duration:%.2f>" % (job_id, task_id, duration))
         sleep(duration)
+        print("Executed <JobId:%d TaskId:%d Duration:%.2f>" % (job_id, task_id, duration))
 
         # Report completion to scheduler
         self.scheduler.task_completed(job_id, task_id)
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     hostname = socket.gethostname()
     Pyro4.Daemon.serveSimple(
         {
-            Worker(nameserver_hostname="arkansas"): "sparrow.worker"
+            Worker(): "sparrow.worker"
         },
         host = hostname
     )
