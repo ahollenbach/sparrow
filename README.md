@@ -18,7 +18,25 @@ Might be differnt for Windows, but here's what I did:
 
 Alternatively, you'll have to follow instructions [here](https://pythonhosted.org/Pyro4/install.html)
 
-## 2. Useful Links
+## 2. Getting Started
+
+#### Name Server
+The name server is hardcoded to look at `newyork`. You can overwrite this with a `nameserver_hostname` parameter provided in most of the class constructors if you want.
+From `newyork`, run:
+```bash
+cd project-dir
+source ./venv/bin/activate # May change depending on your venv location
+pyro4-ns -n newyork
+```
+
+#### Scheduler, Workers
+This is as easy as `python Scheduler.py` and `python Worker.py`. Start the scheduler before the workers.
+
+#### Executing a Routine
+`python SparrowClient.py`
+
+
+## 3. Useful Links
 ### Documents
 [Progress Report](https://docs.google.com/document/d/1TBit5KAJ3NspUf_hseIyiyxuA9Sm01CT6yI5KNSzIpI/edit)
 
