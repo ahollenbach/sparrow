@@ -8,6 +8,10 @@ try:
 except ImportError:
     import Queue as queue  # py2
 
+from Pyro4.util import SerializerBase
+from Job import Job
+SerializerBase.register_dict_to_class("Job.Job", Job.from_dict)
+
 class Scheduler(object):
     METHOD_RAND = "RANDOM"
     METHOD_TWO = "CHOOSE_TWO"
@@ -20,28 +24,31 @@ class Scheduler(object):
 
         # List of jobs that have been scheduled/reserved
         self.in_progress_jobs = {}
+        self.workers = []
 
-        # TODO temp, remove and distribute
-        # self.worker = Worker(self)
-        ns = Pyro4.locateNS(nameserver_hostname)
-        worker_dict = ns.list('sparrow.worker')
+        self.name_server = Pyro4.locateNS(nameserver_hostname)
+
+    def update_workers(self):
+        """ Can get very inefficient, fix """
+        worker_dict = self.name_server.list('sparrow.worker')
         self.workers = []
         for key in worker_dict:
             self.workers.append(Pyro4.Proxy(worker_dict[key]))
         print(self.workers)
-
-        #tmp
-        self.worker = self.workers[0]
+        # TODO doesn't handle node failure
 
     def schedule(self, job):
         """
         Schedules a job, which has been broken down into tasks
         :param job: A Job object
         """
+        print("Scheduling job")
+        self.update_workers()
+
         self.in_progress_jobs[job.id] = job
 
         for task_id in job.tasks:
-            self.worker.add_task(job.id, task_id, job.tasks[task_id])
+            self.workers[0].add_task(job.id, task_id, job.tasks[task_id])
 
     def request_task(self, job_id, task_id):
         # Start with random, not needed for that
@@ -49,9 +56,14 @@ class Scheduler(object):
         raise NotImplementedError()
 
     def task_completed(self, job_id, task_id):
+        if job_id not in self.in_progress_jobs:
+            print("Job not found", job_id)
+            return
         if task_id not in self.in_progress_jobs[job_id].tasks:
             print("Task not found in ", self.in_progress_jobs[job_id])
+            return
 
+        print(job_id, task_id)
         self.in_progress_jobs[job_id].tasks.pop(task_id)
 
         if len(self.in_progress_jobs[job_id].tasks) == 0:

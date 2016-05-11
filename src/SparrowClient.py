@@ -5,9 +5,10 @@ from Scheduler import Scheduler
 from Job import Job
 
 class SparrowClient():
-    def __init__(self):
-        self.scheduler = Pyro4.core.Proxy("PYRONAME:sparrow.scheduler")
-        # self.scheduler = Scheduler()
+    def __init__(self, nameserver_hostname="newyork"):
+	self.name_server = Pyro4.locateNS(nameserver_hostname)
+        scheduler_uri = self.name_server.list('sparrow.scheduler')["sparrow.scheduler"]
+        self.scheduler = Pyro4.core.Proxy(scheduler_uri)
 
     def shutdown(self):
         # TODO Do this cleaner?
@@ -18,11 +19,11 @@ class SparrowClient():
             self.scheduler.schedule(Job(i))
 
         # TODO tmp
-        for i in range(50):
-            self.scheduler.worker.execute_task()
+        #for i in range(50):
+        #    self.scheduler.workers[0].execute_task()
 
 
 if __name__ == "__main__":
-    client = SparrowClient()
+    client = SparrowClient(nameserver_hostname="arkansas")
     client.run()
     client.shutdown()
