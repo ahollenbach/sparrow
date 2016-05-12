@@ -46,14 +46,13 @@ class Worker(object):
         :param task_id:
         :param duration: If this is a task reservation, duration is 0
         """
-        print("adding Task")
+        # print("adding Task")
         self.task_queue.put((job_id, task_id, duration))
 
     def execute_next_task(self):
         if self.task_queue.qsize() == 0:
             return False
 
-        print(self.late_binding)
         if self.late_binding:
             job_id, task_id, duration = self.task_queue.get()
 
