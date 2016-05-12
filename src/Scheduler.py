@@ -44,7 +44,7 @@ class Scheduler(object):
         for key in worker_dict:
             self.workers.append(Pyro4.Proxy(worker_dict[key]))
 
-        print("Workers", self.workers)
+        # print("Workers", self.workers)
 
     def schedule(self, job):
         """
@@ -80,9 +80,6 @@ class Scheduler(object):
 
     # This method defines which method is being used to assign jobs
     def method_chosen(self, job):
-
-        print("Choosing method of operations")
-
         if self.scheduling_method == "RANDOM":
             self.rand(job)
         elif self.scheduling_method == "CHOOSE_TWO":

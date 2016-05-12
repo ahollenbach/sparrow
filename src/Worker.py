@@ -53,6 +53,7 @@ class Worker(object):
         if self.task_queue.qsize() == 0:
             return False
 
+        print(self.late_binding)
         if self.late_binding:
             job_id, task_id, duration = self.task_queue.get()
 
@@ -78,8 +79,6 @@ class Worker(object):
         while True:
             if not self.task_queue.empty():
                 self.execute_next_task()
-            else:
-                time.sleep(2)
 
     # Number of tasks currently in the queue
     def find_load(self):
