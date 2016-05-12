@@ -6,7 +6,6 @@ class Job(object):
     def __init__(self, id, num_tasks=10, task_length=0.1, length_spread=0.0):
         """
         Create the job object.
-
         :param num_tasks: Number of tasks in this job
         :param task_length: Length (in seconds) of each task. In a heterogeneous task, acts as the mean task length
         :param length_spread: Spread (in seconds) from the mean, for heterogeneous tasks. Random spread.
@@ -30,6 +29,7 @@ class Job(object):
         assert classname == "Job.Job"
         j = Job(d["id"], d["num_tasks"], d["task_length"], d["length_spread"])
         return j
+
 
 if __name__ == "__main__":
     # Test
