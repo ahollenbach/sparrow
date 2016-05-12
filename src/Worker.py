@@ -1,6 +1,8 @@
 from __future__ import print_function
 
+import time
 import Pyro4
+import thread
 from Job import Job
 import socket
 from time import sleep
@@ -10,38 +12,43 @@ except ImportError:
     import Queue as queue  # py2
 
 from Pyro4.util import SerializerBase
-import thread
 
 SerializerBase.register_dict_to_class("Job.Job", Job.from_dict)
 
+
 class Worker(object):
-    def __init__(self, late_binding=False, nameserver_hostname="newyork"):  # scheduler only temporary
+
+    def __init__(self, late_binding=False, nameserver_hostname="newyork", worker_number=1):  # scheduler only temporary
         """
         Creates a worker.
-
         :param late_binding: If true, use add_task_reservation, and worker will first place a reservation, and then
                              request the actual task when it is time to execute that reservation.
                              If false, use add_task and the task will be naively added to the queue.
         """
+        self.no_of_workers_per_scheduler = 4
+        self.list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
+        self.list_of_schedulers = ["newyork"]
         self.late_binding = late_binding
         self.task_queue = queue.Queue()
-
+        self.worker_number = worker_number
         # Assume one scheduler for now
+        self.scheduler = ""
         ns = Pyro4.locateNS(nameserver_hostname)
-        scheduler_uri = ns.list('sparrow.scheduler')["sparrow.scheduler"]
-        self.scheduler = Pyro4.core.Proxy(scheduler_uri)
-
+        scheduler_dict = ns.list('sparrow.scheduler')
+        my_scheduler_number = (self.worker_number/4) + 1
+        for key in scheduler_dict:
+            if str(my_scheduler_number) in key:
+                self.scheduler = Pyro4.core.Proxy(scheduler_dict[key])
         self.task_exec_thread = thread.start_new_thread(self.execute_tasks, ())
 
     def add_task(self, job_id, task_id, duration):
         """
         Adds a task to the worker's queue
-
         :param job_id:
         :param task_id:
         :param duration: If this is a task reservation, duration is 0
         """
-        print("adding job")
+        print("adding Task")
         self.task_queue.put((job_id, task_id, duration))
 
     def execute_next_task(self):
@@ -67,16 +74,47 @@ class Worker(object):
 
         return True
 
+    # Ensures the worker is continuously executing jobs
     def execute_tasks(self):
+        print("Executing Tasks")
         while True:
             if not self.task_queue.empty():
                 self.execute_next_task()
+            else:
+                time.sleep(2)
 
+    # Number of tasks currently in the queue
+    def find_load(self):
+        # Find estimated time for all tasks?
+        return self.task_queue.qsize()
+
+
+# Method to assign a worker number to each worker
+def find_worker_number(list_of_workers):
+
+    work_num = 99
+
+    host = socket.gethostname()
+
+    if host in list_of_workers:
+        work_num = list_of_workers.index(host)
+
+    return work_num
+
+
+# The main method
 if __name__ == "__main__":
+
+    list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
+
     hostname = socket.gethostname()
-    Pyro4.Daemon.serveSimple(
-        {
-            Worker(): "sparrow.worker"
-        },
-        host = hostname
-    )
+    worker_number = find_worker_number(list_of_workers)
+    if worker_number != 99:
+        name_in_nameserver = "sparrow.worker" + str(worker_number + 1)
+        Pyro4.Daemon.serveSimple(
+            {
+                Worker(worker_number): name_in_nameserver
+            },
+            host=hostname,
+            ns=True
+        )
