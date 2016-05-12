@@ -26,8 +26,6 @@ class Worker(object):
                              If false, use add_task and the task will be naively added to the queue.
         """
         self.no_of_workers_per_scheduler = 4
-        self.list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
-        self.list_of_schedulers = ["newyork"]
         self.late_binding = late_binding
         self.task_queue = queue.Queue()
         self.worker_number = worker_number
@@ -93,6 +91,7 @@ class Worker(object):
 def find_worker_number(list_of_workers):
 
     work_num = 99
+    list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
 
     host = socket.gethostname()
 
@@ -105,10 +104,9 @@ def find_worker_number(list_of_workers):
 # The main method
 if __name__ == "__main__":
 
-    list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
-
     hostname = socket.gethostname()
-    worker_number = find_worker_number(list_of_workers)
+    #worker_number = find_worker_number()
+    worker_number = raw_input("Please enter worker number")
     if worker_number != 99:
         name_in_nameserver = "sparrow.worker" + str(worker_number + 1)
         Pyro4.Daemon.serveSimple(
