@@ -102,16 +102,12 @@ def find_worker_number(list_of_workers):
 
 # The main method
 if __name__ == "__main__":
-
     hostname = socket.gethostname()
-    #worker_number = find_worker_number()
-    worker_number = raw_input("Please enter worker number")
-    if worker_number != "99":
-        name_in_nameserver = "sparrow.worker" + str(int(worker_number) + 1)
-        Pyro4.Daemon.serveSimple(
-            {
-                Worker(worker_number): name_in_nameserver
-            },
-            host=hostname,
-            ns=True
-        )
+    name_in_nameserver = "sparrow.worker." + hostname
+    Pyro4.Daemon.serveSimple(
+        {
+            Worker(): name_in_nameserver
+        },
+        host=hostname,
+        ns=True
+    )
