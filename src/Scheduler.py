@@ -137,25 +137,26 @@ class Scheduler(object):
             for each in random_workers:
                 worker_load.append([self.workers[each].find_load(), each ])
             worker_load.sort()
-            for task_id in job.task:
+            for task_id in job.tasks:
                 worker_id = self.workers[task_id]
                 self.workers[worker_id[1]].add_task(job.id, task_id, job.tasks[task_id])
         else:
             print("Number of workers not adequate")
-            total_number_of_tasks = len(job.task)
-            while total_number_of_tasks > 0:
-                current_tasks = []
-                for i in range(len(self.workers)):
-                    current_tasks.append(job.task[i])
-                    total_number_of_tasks -= 1
-                random_workers = self.pick_random_workers(len(self.workers))
+            task_idx = 0
+            while task_idx < len(job.tasks):
+                num_workers = min(len(job.tasks) - task_idx - 1, len(self.workers))
+                random_worker_indices = self.pick_random_workers(num_workers)
+
                 worker_load = []
-                for each in random_workers:
-                    worker_load.append([self.workers[each].find_load(), each ])
+                for random_work_idx in random_worker_indices:
+                    worker_load.append([self.workers[random_work_idx].find_load(), random_work_idx ])
                 worker_load.sort()
-                for task_id in current_tasks:
-                    worker_id = self.workers[task_id]
-                    self.workers[worker_id[1]].add_task(job.id, task_id, current_tasks[task_id])
+
+                for i in range(0, num_workers):
+                    task_id = task_idx + i
+                    _, worker_id = worker_load[task_id]
+                    self.workers[worker_id].add_task(job.id, task_id, job.tasks[task_id])
+                    task_idx += i
 
 
     # Implements Late Binding method of assigning tasks to workers
@@ -170,12 +171,12 @@ class Scheduler(object):
             for each in random_workers:
                 worker_load.append([self.workers[each].find_load(), each ])
             worker_load.sort()
-            for task_id in job.task:
+            for task_id in job.tasks:
                 worker_id = self.workers[task_id]
                 self.workers[worker_id[1]].add_task(job.id, task_id, job.tasks[task_id])
         else:
             print("Number of workers not adequate")
-            total_number_of_tasks = len(job.task)
+            total_number_of_tasks = len(job.tasks)
             while total_number_of_tasks > 0:
                 print()
 
