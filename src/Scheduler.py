@@ -22,8 +22,6 @@ class Scheduler(object):
 
     def __init__(self, scheduling_method=METHOD_RAND, nameserver_hostname="newyork", scheduler_number=1):
         self.no_of_workers_per_scheduler = 4
-        self.list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
-        self.list_of_schedulers = ["newyork"]
         self.scheduling_method = scheduling_method
         print("Scheduling method: ", self.scheduling_method)
 
@@ -59,9 +57,6 @@ class Scheduler(object):
         self.in_progress_jobs[job.id] = job
 
         self.method_chosen(job)
-
-        #for task_id in job.tasks:
-        #    self.workers[0].add_task(job.id, task_id, job.tasks[task_id])
 
     def request_task(self, job_id, task_id):
         # Start with random, not needed for that
@@ -115,21 +110,95 @@ class Scheduler(object):
     # Implements choose two method of assigning tasks to workers
     def choose_two(self, job):
         print("Choose Two method")
-        
+        for task_id in job.tasks:
+            rand_work1 = random.randint(((self.scheduler_number -1)*self.no_of_workers_per_scheduler),
+                                               ((self.scheduler_number*self.no_of_workers_per_scheduler) -1))
+            done = False
+            while not done:
+                rand_work2 = random.randint(((self.scheduler_number -1)*self.no_of_workers_per_scheduler),
+                                                   ((self.scheduler_number*self.no_of_workers_per_scheduler) -1))
+                if rand_work1 != rand_work2:
+                    done = True
+            work1_load = self.workers[rand_work1].find_load()
+            work2_load = self.workers[rand_work2].find_load()
+            if int(work1_load) < int(work2_load):
+                self.workers[rand_work1].add_task(job.id, task_id, job.tasks[task_id])
+            else:
+                self.workers[rand_work2].add_task(job.id, task_id, job.tasks[task_id])
 
     # Implements batch processing method of assigning tasks to workers
     def batch(self, job):
         print("Batch processing")
+        choose = 2
+        if len(self.workers) >= (choose * len(job.tasks)):
+            print("Number of workers is adequate")
+            random_workers = self.pick_random_workers(choose * len(job.tasks))
+            worker_load = []
+            for each in random_workers:
+                worker_load.append([self.workers[each].find_load(), each ])
+            worker_load.sort()
+            for task_id in job.task:
+                worker_id = self.workers[task_id]
+                self.workers[worker_id[1]].add_task(job.id, task_id, job.tasks[task_id])
+        else:
+            print("Number of workers not adequate")
+            total_number_of_tasks = len(job.task)
+            while total_number_of_tasks > 0:
+                current_tasks = []
+                for i in range(len(self.workers)):
+                    current_tasks.append(job.task[i])
+                    total_number_of_tasks -= 1
+                random_workers = self.pick_random_workers(len(self.workers))
+                worker_load = []
+                for each in random_workers:
+                    worker_load.append([self.workers[each].find_load(), each ])
+                worker_load.sort()
+                for task_id in current_tasks:
+                    worker_id = self.workers[task_id]
+                    self.workers[worker_id[1]].add_task(job.id, task_id, current_tasks[task_id])
+
 
     # Implements Late Binding method of assigning tasks to workers
     def late(self, job):
         print("Late binding")
+        choose = 2
+        # Same as batch. Tell worker that late binding is on
+        if len(self.workers) >= (choose * len(job.tasks)):
+            print("Number of workers is adequate")
+            random_workers = self.pick_random_workers(choose * len(job.tasks))
+            worker_load = []
+            for each in random_workers:
+                worker_load.append([self.workers[each].find_load(), each ])
+            worker_load.sort()
+            for task_id in job.task:
+                worker_id = self.workers[task_id]
+                self.workers[worker_id[1]].add_task(job.id, task_id, job.tasks[task_id])
+        else:
+            print("Number of workers not adequate")
+            total_number_of_tasks = len(job.task)
+            while total_number_of_tasks > 0:
+                print()
+
+    # Prints Random servers to to probe
+    def pick_random_workers(self,no_of_workers_to_probe):
+
+        random_servers = []
+
+        while no_of_workers_to_probe > 0:
+            rand_work1 = random.randint(((self.scheduler_number -1)*self.no_of_workers_per_scheduler),
+                                        ((self.scheduler_number*self.no_of_workers_per_scheduler) -1))
+            if rand_work1 not in random_servers:
+                random_servers.append(rand_work1)
+                no_of_workers_to_probe -= 1
+
+        return random_servers
 
 
 # Method to assign a worker number to each worker
-def find_scheduler_number(list_of_schedulers):
+def find_scheduler_number():
 
     sched_num = 99
+    list_of_schedulers = ["newyork"]
 
     host = socket.gethostname()
 
@@ -140,10 +209,9 @@ def find_scheduler_number(list_of_schedulers):
 
 if __name__ == "__main__":
 
-    list_of_schedulers = ["newyork"]
-
     hostname = socket.gethostname()
-    scheduler_number = find_scheduler_number(list_of_schedulers)
+    # scheduler_number = find_scheduler_number()
+    scheduler_number = raw_input("Please enter number of scheduler")
     if scheduler_number != 99:
         name_in_nameserver = "sparrow.scheduler" + str(scheduler_number + 1)
         Pyro4.Daemon.serveSimple(
