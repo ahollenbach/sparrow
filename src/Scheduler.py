@@ -212,9 +212,9 @@ if __name__ == "__main__":
 
     hostname = socket.gethostname()
     # scheduler_number = find_scheduler_number()
-    scheduler_number = raw_input("Please enter number of scheduler")
-    if scheduler_number != 99:
-        name_in_nameserver = "sparrow.scheduler" + str(scheduler_number + 1)
+    scheduler_number = raw_input("Please enter number of scheduler: ")
+    if scheduler_number != "99":
+        name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
         Pyro4.Daemon.serveSimple(
             {
                 Scheduler(): name_in_nameserver
