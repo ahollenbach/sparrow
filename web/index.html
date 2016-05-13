@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sparrow</title>
+
+    <link href="web/bootstrap.min.css" rel="stylesheet">
+    <style>
+      a.nostyle {
+        color: inherit;
+        text-decoration: none;
+      }
+      a.nostyle:hover {
+        color: inherit;
+        text-decoration:none;
+        cursor:pointer;
+      }
+    </style>
+  </head>
+  <body role="document">
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Sparrow</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+      <div class="page-header" id="worker-container">
+        <canvas id="worker-chart" width="600" height="300"></canvas>
+        <div id="workers"></div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="web/Chart.bundle.min.js"></script>
+    <script src="web/main.js"></script>
+  </body>
+</html>
