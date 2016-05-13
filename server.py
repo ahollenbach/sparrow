@@ -7,19 +7,37 @@ import json
 import random
 import re
 import socket
+import Pyro4
+from src.Worker import Worker
 
+
+workers = []
 
 # Inspired by:
 #   https://mafayyaz.wordpress.com/2013/02/08/writing-simple-http-server-in-python-with-rest-and-json/
 class HTTPRequestHandler(BaseHTTPRequestHandler):
+    def initialize(self):
+        self.name_server = Pyro4.locateNS("newyork")
+        self.workers = []
+        self.update_workers()
+
     def do_GET(self):
+        if 'workers' not in self.__dict__:
+            self.initialize()
+
         if None != re.search('/sparrow/status', self.path):
             # API request
-            # TODO Dummy response to be replaced with actual
-            statuses = {
-                "worker1" : random.randint(0,5),
-                "worker2" : random.randint(0,5)
-            }
+
+            statuses = {}
+
+            self.update_workers()
+            for worker in self.workers:
+                statuses[worker.name] = worker.find_load()
+
+            # statuses = {
+            #     "worker1" : random.randint(0,5),
+            #     "worker2" : random.randint(0,5)
+            # }
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -57,6 +75,28 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_response(403)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
+
+    def update_workers(self):
+        # List all sparrow workers (i.e. sparrow.worker.arizona)
+        worker_dict = self.name_server.list('sparrow.worker')
+
+        new_workers = []
+        # Add new workers
+        for key in worker_dict:
+            worker = Pyro4.Proxy(worker_dict[key])
+            new_workers.append(worker)
+            if worker not in self.workers:
+                self.workers.append(worker)
+
+        # Clean nameserver
+        missing_nodes = list(set(self.workers) - set(new_workers))
+        for missing_node in missing_nodes:
+            print("Trimming %s from nameserver." % (missing_node.name))
+            self.name_server.remove(name=missing_node.name)
+            # Remove local
+            self.workers.remove(missing_node)
+
+        print(self.workers)
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
