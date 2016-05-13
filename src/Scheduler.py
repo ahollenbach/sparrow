@@ -21,7 +21,7 @@ class Scheduler(object):
     METHOD_LATE = "BATCH+LATE_BINDING"
 
     def __init__(self, scheduling_method=METHOD_RAND, nameserver_hostname="newyork", scheduler_number=1):
-        self.no_of_workers_per_scheduler = 100
+        self.no_of_workers_per_scheduler = 10
         self.scheduling_method = scheduling_method
         print("Scheduling method: ", self.scheduling_method)
 
@@ -64,7 +64,7 @@ class Scheduler(object):
             # Remove local
             self.workers.remove(missing_node)
 
-        print(self.workers)
+        # print(self.workers)
 
     def schedule(self, job):
         """
@@ -198,7 +198,7 @@ class Scheduler(object):
                     worker_load.sort()
                     for task_id in range(len(random_worker_indices)/choose):
                         worker_id = worker_load[task_id]
-                        self.workers[worker_id[task_id]].add_task(job.id, task_idx, job.tasks[task_idx])
+                        self.workers[worker_id[1]].add_task(job.id, task_idx, job.tasks[task_idx])
                         task_idx += 1
 
     # Prints Random servers to to probe
@@ -206,8 +206,7 @@ class Scheduler(object):
 
         random_servers = []
         while no_of_workers_to_probe > 0:
-            rand_work1 = random.randint(((self.scheduler_number -1)*self.no_of_workers_per_scheduler),
-                                        ((self.scheduler_number*self.no_of_workers_per_scheduler) -1))
+            rand_work1 = random.randint(0, len(self.workers)-1)
             if rand_work1 not in random_servers:
                 random_servers.append(rand_work1)
                 no_of_workers_to_probe -= 1

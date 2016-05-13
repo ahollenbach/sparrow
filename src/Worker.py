@@ -40,8 +40,7 @@ class Worker(object):
         self.task_exec_thread = thread.start_new_thread(self.execute_tasks, ())
 
     def set_late_binding(self, enabled):
-        if self.late_binding != enabled:
-            self.late_binding = enabled
+        self.late_binding = enabled
 
     def add_task(self, job_id, task_id, duration):
         """
@@ -75,7 +74,8 @@ class Worker(object):
         self.working = False
 
         # Report completion to scheduler
-        self.scheduler.task_completed(job_id, task_id)
+        # TODO
+        # self.scheduler.task_completed(job_id, task_id)
 
         return True
 
