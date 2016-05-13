@@ -70,4 +70,4 @@ window.setInterval(function(){
 
     barChart.update()
   })
-}, 2000);
+}, 750);
