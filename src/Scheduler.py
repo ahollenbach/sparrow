@@ -95,13 +95,13 @@ class Scheduler(object):
 
     # This method defines which method is being used to assign jobs
     def method_chosen(self, job):
-        if self.scheduling_method == "RANDOM":
+        if self.scheduling_method == Scheduler.METHOD_RAND:
             self.rand(job)
-        elif self.scheduling_method == "CHOOSE_TWO":
+        elif self.scheduling_method == Scheduler.METHOD_TWO:
             self.choose_two(job)
-        elif self.scheduling_method == "BATCH":
+        elif self.scheduling_method == Scheduler.METHOD_BATCH:
             self.batch(job, False)
-        elif self.scheduling_method == "BATCH+LATE_BINDING":
+        elif self.scheduling_method == Scheduler.METHOD_LATE:
             self.batch(job, True)
 
     # Implements random choosing of workers for tasks
@@ -203,26 +203,13 @@ class Scheduler(object):
         return random_servers
 
 
-# Method to assign a worker number to each worker
-def find_scheduler_number():
-
-    sched_num = 99
-    list_of_schedulers = ["newyork"]
-
-    host = socket.gethostname()
-
-    if host in list_of_schedulers:
-        sched_num = list_of_schedulers.index(host)
-
-    return sched_num
-
 if __name__ == "__main__":
     scheduler_number = 1  # Don't worry about multiple schedulers
     hostname = socket.gethostname()
     name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
     Pyro4.Daemon.serveSimple(
         {
-            Scheduler("BATCH+LATE_BINDING"): name_in_nameserver
+            Scheduler(Scheduler.METHOD_RAND): name_in_nameserver
         },
         host=hostname
     )
