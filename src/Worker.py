@@ -95,7 +95,7 @@ if __name__ == "__main__":
     name_in_nameserver = "sparrow.worker." + hostname
     Pyro4.Daemon.serveSimple(
         {
-            Worker(name_in_nameserver, late_binding=True): name_in_nameserver
+            Worker(name_in_nameserver, late_binding=False): name_in_nameserver
         },
         host=hostname,
         ns=True
