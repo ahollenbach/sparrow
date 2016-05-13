@@ -49,7 +49,7 @@ class Scheduler(object):
         # Clean nameserver
         missing_nodes = list(set(self.workers) - set(new_workers))
         for missing_node in missing_nodes:
-            print("Trimming %s from nameserver.")
+            print("Trimming %s from nameserver." % (missing_node.name))
             self.name_server.remove(name=missing_node.name)
             # Remove local
             self.workers.remove(missing_node)
