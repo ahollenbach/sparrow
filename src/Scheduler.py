@@ -54,7 +54,7 @@ class Scheduler(object):
             # Remove local
             self.workers.remove(missing_node)
 
-        print self.workers
+        print(self.workers)
 
     def schedule(self, job):
         """
