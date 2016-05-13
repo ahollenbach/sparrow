@@ -21,7 +21,7 @@ class Scheduler(object):
     METHOD_LATE = "BATCH+LATE_BINDING"
 
     def __init__(self, scheduling_method=METHOD_RAND, nameserver_hostname="newyork", scheduler_number=1):
-        self.no_of_workers_per_scheduler = 4
+        self.no_of_workers_per_scheduler = 100
         self.scheduling_method = scheduling_method
         print("Scheduling method: ", self.scheduling_method)
 

@@ -42,12 +42,15 @@ var barChart = new Chart(ctx, {
 window.setInterval(function(){
   $.get("http://hollabook.student.rit.edu:8901/sparrow/status", function(response) {
     $.each(response, function(worker_name, worker_load) {
-      var worker_elem = $("#workers #" + worker_name)
-      if (worker_elem.length) {
+      var id_name = worker_name.replace(".", "_").replace(".", "_").replace(".", "_")
+
+      var worker_elem = $("#workers #" + id_name)
+        console.log(worker_elem, worker_elem.length)
+      if (worker_elem.length > 0) {
         worker_elem.children(".worker_load").html(worker_load)
       } else {
         $("#workers").append(
-          "<div id='" + worker_name + "'>" +
+          "<div id='" + id_name + "'>" +
             "<div class='worker_name'>" + worker_name + "</div>" +
             "<div class='worker_load'>" + worker_load + "</div>" +
           "</div>");
