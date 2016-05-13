@@ -34,6 +34,16 @@ class Scheduler(object):
         self.assigned_tasks = []
         self.name_server = Pyro4.locateNS(nameserver_hostname)
 
+    def set_method(self, method):
+        self.scheduling_method = method
+
+        if method == Scheduler.METHOD_LATE:
+            for worker in self.workers:
+                worker.set_late_binding(True)
+        else:
+            for worker in self.workers:
+                worker.set_late_binding(False)
+
     def update_workers(self):
         # List all sparrow workers (i.e. sparrow.worker.arizona)
         worker_dict = self.name_server.list('sparrow.worker')
