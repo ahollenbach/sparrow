@@ -32,6 +32,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
             self.update_workers()
             for worker in self.workers:
+                print(worker._pyroMethods)
                 statuses[worker.name] = worker.find_load()
 
             # statuses = {
@@ -80,21 +81,9 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         # List all sparrow workers (i.e. sparrow.worker.arizona)
         worker_dict = self.name_server.list('sparrow.worker')
 
-        new_workers = []
-        # Add new workers
+        self.workers = []
         for key in worker_dict:
-            worker = Pyro4.Proxy(worker_dict[key])
-            new_workers.append(worker)
-            if worker not in self.workers:
-                self.workers.append(worker)
-
-        # Clean nameserver
-        missing_nodes = list(set(self.workers) - set(new_workers))
-        for missing_node in missing_nodes:
-            print("Trimming %s from nameserver." % (missing_node.name))
-            self.name_server.remove(name=missing_node.name)
-            # Remove local
-            self.workers.remove(missing_node)
+            self.workers.append(Pyro4.Proxy(worker_dict[key]))
 
         print(self.workers)
 
