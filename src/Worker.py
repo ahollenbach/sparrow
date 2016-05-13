@@ -29,6 +29,7 @@ class Worker(object):
         self.late_binding = late_binding
         self.task_queue = queue.Queue()
         self.worker_number = worker_number
+        self.working = False
         # Assume one scheduler for now
         self.scheduler = ""
         ns = Pyro4.locateNS(nameserver_hostname)
@@ -64,8 +65,11 @@ class Worker(object):
 
         # "Execute" our task
         print("Executing <JobId:%d TaskId:%d Duration:%.2f>" % (job_id, task_id, duration))
+        self.working = True
         sleep(duration)
+
         print("Executed <JobId:%d TaskId:%d Duration:%.2f>" % (job_id, task_id, duration))
+        self.working = False
 
         # Report completion to scheduler
         self.scheduler.task_completed(job_id, task_id)
@@ -81,8 +85,11 @@ class Worker(object):
 
     # Number of tasks currently in the queue
     def find_load(self):
-        # Find estimated time for all tasks?
-        return self.task_queue.qsize()
+        # Find estimated time for all tasks
+        if self.working:
+            return self.task_queue.qsize() +1
+        else:
+            return self.task_queue.qsize()
 
 
 # Method to assign a worker number to each worker
