@@ -89,6 +89,9 @@ class Worker(object):
         else:
             return self.task_queue.qsize()
 
+    def get_name(self):
+        return self.name
+
 # The main method
 if __name__ == "__main__":
     hostname = socket.gethostname()

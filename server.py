@@ -27,13 +27,11 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
         if None != re.search('/sparrow/status', self.path):
             # API request
+            self.update_workers()
 
             statuses = {}
-
-            self.update_workers()
             for worker in self.workers:
-                print(worker._pyroMethods)
-                statuses[worker.name] = worker.find_load()
+                statuses[worker.get_name()] = worker.find_load()
 
             # statuses = {
             #     "worker1" : random.randint(0,5),
@@ -81,9 +79,10 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         # List all sparrow workers (i.e. sparrow.worker.arizona)
         worker_dict = self.name_server.list('sparrow.worker')
 
-        self.workers = []
         for key in worker_dict:
-            self.workers.append(Pyro4.Proxy(worker_dict[key]))
+            worker = Pyro4.Proxy(worker_dict[key])
+            if worker not in self.workers:
+                self.workers.append(worker)
 
         print(self.workers)
 
