@@ -135,26 +135,24 @@ class Scheduler(object):
                 worker_load.append([self.workers[each].find_load(), each ])
             worker_load.sort()
             for task_id in job.tasks:
-                worker_id = self.workers[task_id]
+                worker_id = worker_load[task_id]
                 self.workers[worker_id[1]].add_task(job.id, task_id, job.tasks[task_id])
+
         else:
             print("Number of workers not adequate")
             task_idx = 0
             while task_idx < len(job.tasks):
-                num_workers = min(len(job.tasks) - task_idx - 1, len(self.workers))
+                choose = 2
+                num_workers = min(((len(job.tasks)-task_idx) * choose) , len(self.workers))
                 random_worker_indices = self.pick_random_workers(num_workers)
-
                 worker_load = []
                 for random_work_idx in random_worker_indices:
                     worker_load.append([self.workers[random_work_idx].find_load(), random_work_idx ])
                 worker_load.sort()
-
-                for i in range(0, num_workers):
-                    task_id = task_idx + i
-                    _, worker_id = worker_load[task_id]
-                    self.workers[worker_id].add_task(job.id, task_id, job.tasks[task_id])
-                    task_idx += i
-
+                for task_id in range(len(random_worker_indices)/2):
+                    worker_id = worker_load[task_id]
+                    self.workers[worker_id[task_id]].add_task(job.id, task_idx, job.tasks[task_idx])
+                    task_idx += 1
 
     # Implements Late Binding method of assigning tasks to workers
     def late(self, job):
@@ -181,14 +179,13 @@ class Scheduler(object):
     def pick_random_workers(self,no_of_workers_to_probe):
 
         random_servers = []
-
         while no_of_workers_to_probe > 0:
             rand_work1 = random.randint(((self.scheduler_number -1)*self.no_of_workers_per_scheduler),
                                         ((self.scheduler_number*self.no_of_workers_per_scheduler) -1))
             if rand_work1 not in random_servers:
                 random_servers.append(rand_work1)
                 no_of_workers_to_probe -= 1
-
+        print(str(random_servers))
         return random_servers
 
 
@@ -214,8 +211,7 @@ if __name__ == "__main__":
         name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
         Pyro4.Daemon.serveSimple(
             {
-                Scheduler(): name_in_nameserver
+                Scheduler("BATCH"): name_in_nameserver
             },
             host=hostname
         )
-
