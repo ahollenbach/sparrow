@@ -11,7 +11,7 @@ class SparrowClient():
 
     def run(self):
         for i in range(1):
-            self.scheduler.schedule(Job(i, num_tasks=3, task_length=1))
+            self.scheduler.schedule(Job(i, num_tasks=5, task_length=1))
 
 
 if __name__ == "__main__":
