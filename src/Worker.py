@@ -19,26 +19,24 @@ SerializerBase.register_dict_to_class("Job.Job", Job.from_dict)
 
 class Worker(object):
 
-    def __init__(self, late_binding=False, nameserver_hostname="newyork", worker_number=1):  # scheduler only temporary
+    def __init__(self, name_in_nameserver, late_binding=False, nameserver_hostname="newyork"):
         """
         Creates a worker.
         :param late_binding: If true, use add_task_reservation, and worker will first place a reservation, and then
                              request the actual task when it is time to execute that reservation.
                              If false, use add_task and the task will be naively added to the queue.
         """
-        self.no_of_workers_per_scheduler = 4
+        self.name = name_in_nameserver
         self.late_binding = late_binding
         self.task_queue = queue.Queue()
-        self.worker_number = worker_number
         self.working = False
-        # Assume one scheduler for now
-        self.scheduler = ""
+
         ns = Pyro4.locateNS(nameserver_hostname)
         scheduler_dict = ns.list('sparrow.scheduler')
-        my_scheduler_number = (self.worker_number/4) + 1
         for key in scheduler_dict:
-            if str(my_scheduler_number) in key:
+            if str(1) in key:  # Hardcode 1 scheduler. If you want more, let's finish everything else first
                 self.scheduler = Pyro4.core.Proxy(scheduler_dict[key])
+
         self.task_exec_thread = thread.start_new_thread(self.execute_tasks, ())
 
     def add_task(self, job_id, task_id, duration):
@@ -84,28 +82,12 @@ class Worker(object):
             if not self.task_queue.empty():
                 self.execute_next_task()
 
-    # Number of tasks currently in the queue
     def find_load(self):
-        # Find estimated time for all tasks
+        # Find estimated time for all tasks (# tasks in queue)
         if self.working:
             return self.task_queue.qsize() +1
         else:
             return self.task_queue.qsize()
-
-
-# Method to assign a worker number to each worker
-def find_worker_number(list_of_workers):
-
-    work_num = 99
-    list_of_workers = ["newyork", "newyork", "newyork", "newyork"]
-
-    host = socket.gethostname()
-
-    if host in list_of_workers:
-        work_num = list_of_workers.index(host)
-
-    return work_num
-
 
 # The main method
 if __name__ == "__main__":
@@ -113,8 +95,7 @@ if __name__ == "__main__":
     name_in_nameserver = "sparrow.worker." + hostname
     Pyro4.Daemon.serveSimple(
         {
-            # Worker(): name_in_nameserver
-            Worker(True, "newyork", 1): name_in_nameserver
+            Worker(name_in_nameserver, late_binding=True): name_in_nameserver
         },
         host=hostname,
         ns=True

@@ -35,16 +35,26 @@ class Scheduler(object):
         self.name_server = Pyro4.locateNS(nameserver_hostname)
 
     def update_workers(self):
-        # TODO can get very inefficient
-        # TODO doesn't handle node failure
-
         # List all sparrow workers (i.e. sparrow.worker.arizona)
         worker_dict = self.name_server.list('sparrow.worker')
-        self.workers = []
-        for key in worker_dict:
-            self.workers.append(Pyro4.Proxy(worker_dict[key]))
 
-        # print("Workers", self.workers)
+        new_workers = []
+        # Add new workers
+        for key in worker_dict:
+            worker = Pyro4.Proxy(worker_dict[key])
+            new_workers.append(worker)
+            if worker not in self.workers:
+                self.workers.append(worker)
+
+        # Clean nameserver
+        missing_nodes = list(set(self.workers) - set(new_workers))
+        for missing_node in missing_nodes:
+            print("Trimming %s from nameserver.")
+            self.name_server.remove(name=missing_node.name)
+            # Remove local
+            self.workers.remove(missing_node)
+
+        print self.workers
 
     def schedule(self, job):
         """
@@ -207,15 +217,12 @@ def find_scheduler_number():
     return sched_num
 
 if __name__ == "__main__":
-
+    scheduler_number = 1  # Don't worry about multiple schedulers
     hostname = socket.gethostname()
-    # scheduler_number = find_scheduler_number()
-    scheduler_number = raw_input("Please enter number of scheduler: ")
-    if scheduler_number != "99":
-        name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
-        Pyro4.Daemon.serveSimple(
-            {
-                Scheduler("BATCH+LATE_BINDING"): name_in_nameserver
-            },
-            host=hostname
-        )
+    name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
+    Pyro4.Daemon.serveSimple(
+        {
+            Scheduler("BATCH+LATE_BINDING"): name_in_nameserver
+        },
+        host=hostname
+    )
