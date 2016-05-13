@@ -9,7 +9,8 @@ import re
 import socket
 
 
-# Inspired by: https://mafayyaz.wordpress.com/2013/02/08/writing-simple-http-server-in-python-with-rest-and-json/
+# Inspired by:
+#   https://mafayyaz.wordpress.com/2013/02/08/writing-simple-http-server-in-python-with-rest-and-json/
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if None != re.search('/sparrow/status', self.path):
@@ -70,30 +71,11 @@ class SimpleHttpServer():
     def __init__(self, ip, port):
         self.server = ThreadedHTTPServer((ip, port), HTTPRequestHandler)
 
-    def start(self):
-        self.server_thread = threading.Thread(target=self.server.serve_forever)
-        self.server_thread.daemon = True
-        self.server_thread.start()
-
-    def waitForThread(self):
-        self.server_thread.join()
-
-    def stop(self):
-        self.server.shutdown()
-        self.waitForThread()
-
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(description='HTTP Server')
-    # parser.add_argument('port', type=int, help='Listening port for HTTP Server', default=8901)
-    # args = parser.parse_args()
-    #
-    # server = SimpleHttpServer(socket.gethostname(), args.port)
     HOST = socket.gethostname()
     PORT = 8901
 
     server = SimpleHttpServer(HOST, PORT)
     print('Starting server at %s:%d' % (HOST, PORT))
-    # server.start()
-    # server.waitForThread()
     server.server.serve_forever()
