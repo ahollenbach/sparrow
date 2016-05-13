@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import time
 import Pyro4
+import random
 import thread
 from Job import Job
 import socket
@@ -112,7 +113,8 @@ if __name__ == "__main__":
     name_in_nameserver = "sparrow.worker." + hostname
     Pyro4.Daemon.serveSimple(
         {
-            Worker(): name_in_nameserver
+            # Worker(): name_in_nameserver
+            Worker(True, "newyork", 1): name_in_nameserver
         },
         host=hostname,
         ns=True
