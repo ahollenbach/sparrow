@@ -154,8 +154,9 @@ class Scheduler(object):
 
             if late_binding:
                 for task_id in job.tasks:
-                    for each_worker in random_workers:
+                    if [job.id, task_id] not in self.assigned_tasks:
                         self.assigned_tasks.append([job.id, task_id])
+                    for each_worker in random_workers:
                         self.workers[each_worker].add_task(job.id, task_id, job.tasks[task_id])
             else:
                 worker_load = []
@@ -175,8 +176,9 @@ class Scheduler(object):
 
                 if late_binding:
                     for task_id in range(len(random_worker_indices)/choose):
+                        if [job.id, task_idx] not in self.assigned_tasks:
+                            self.assigned_tasks.append([job.id, task_id])
                         for each_worker_index in random_worker_indices:
-                            self.assigned_tasks.append([job.id, task_idx])
                             self.workers[each_worker_index].add_task(job.id, task_idx, job.tasks[task_idx])
                     task_idx += 1
                 else:
@@ -207,6 +209,7 @@ if __name__ == "__main__":
     scheduler_number = 1  # Don't worry about multiple schedulers
     hostname = socket.gethostname()
     name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
+    Pyro4.config.SERVERTYPE = "multiplex"
     Pyro4.Daemon.serveSimple(
         {
             Scheduler(Scheduler.METHOD_RAND): name_in_nameserver
