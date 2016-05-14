@@ -71,7 +71,7 @@ class Scheduler(object):
         Schedules a job, which has been broken down into tasks
         :param job: A Job object
         """
-        print("Scheduling job")
+        # print("Scheduling job")
         self.update_workers()
 
         self.in_progress_jobs[job.id] = job
@@ -86,7 +86,6 @@ class Scheduler(object):
             return True
         else:
             return False
-        # raise NotImplementedError()
 
     def task_completed(self, job_id, task_id):
         if job_id not in self.in_progress_jobs:
@@ -106,12 +105,16 @@ class Scheduler(object):
     # This method defines which method is being used to assign jobs
     def method_chosen(self, job):
         if self.scheduling_method == Scheduler.METHOD_RAND:
+            self.set_method(Scheduler.METHOD_RAND)
             self.rand(job)
         elif self.scheduling_method == Scheduler.METHOD_TWO:
+            self.set_method(Scheduler.METHOD_TWO)
             self.choose_two(job)
         elif self.scheduling_method == Scheduler.METHOD_BATCH:
+            self.set_method(Scheduler.METHOD_BATCH)
             self.batch(job, False)
         elif self.scheduling_method == Scheduler.METHOD_LATE:
+            self.set_method(Scheduler.METHOD_LATE)
             self.batch(job, True)
 
     # Implements random choosing of workers for tasks
@@ -181,13 +184,13 @@ class Scheduler(object):
             print("Number of workers not adequate")
             task_idx = 0
             while task_idx < len(job.tasks):
-                num_workers = min(((len(job.tasks)-task_idx) * choose) , len(self.workers))
+                num_workers = min(((len(job.tasks)-task_idx) * choose), len(self.workers))
                 random_worker_indices = self.pick_random_workers(num_workers)
 
                 if late_binding:
                     for task_id in range(len(random_worker_indices)/choose):
                         if [job.id, task_idx] not in self.assigned_tasks:
-                            self.assigned_tasks.append([job.id, task_id])
+                            self.assigned_tasks.append([job.id, task_idx])
                         for each_worker_index in random_worker_indices:
                             self.workers[each_worker_index].add_task(job.id, task_idx, job.tasks[task_idx])
                     task_idx += 1
@@ -210,12 +213,12 @@ class Scheduler(object):
             if rand_work1 not in random_servers:
                 random_servers.append(rand_work1)
                 no_of_workers_to_probe -= 1
-        print(str(random_servers))
+        # print(str(random_servers))
         return random_servers
 
 
 if __name__ == "__main__":
-    scheduler_number = 1  # Don't worry about multiple schedulers
+    scheduler_number = 1
     hostname = socket.gethostname()
     name_in_nameserver = "sparrow.scheduler." + str(int(scheduler_number))
     Pyro4.config.SERVERTYPE = "multiplex"
