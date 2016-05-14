@@ -40,7 +40,7 @@ var barChart = new Chart(ctx, {
 });
 
 window.setInterval(function(){
-  $.get("http://hollabook.student.rit.edu:8901/sparrow/status", function(response) {
+  $.get("/sparrow/status", function(response) {
     $.each(response, function(worker_name, worker_load) {
       var id_name = worker_name.replace(".", "_").replace(".", "_").replace(".", "_")
 
