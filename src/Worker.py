@@ -34,7 +34,7 @@ class Worker(object):
         ns = Pyro4.locateNS(nameserver_hostname)
         scheduler_dict = ns.list('sparrow.scheduler')
         for key in scheduler_dict:
-            if str(1) in key:  # Hardcode 1 scheduler. If you want more, let's finish everything else first
+            if str(1) in key:
                 self.scheduler = Pyro4.core.Proxy(scheduler_dict[key])
 
         self.task_exec_thread = thread.start_new_thread(self.execute_tasks, ())
@@ -74,14 +74,13 @@ class Worker(object):
         self.working = False
 
         # Report completion to scheduler
-        # TODO
-        # self.scheduler.task_completed(job_id, task_id)
+        self.scheduler.task_completed(job_id, task_id)
 
         return True
 
     # Ensures the worker is continuously executing jobs
     def execute_tasks(self):
-        print("Executing Tasks")
+        # print("Executing Tasks")
         while True:
             if not self.task_queue.empty():
                 self.execute_next_task()
@@ -89,7 +88,7 @@ class Worker(object):
     def find_load(self):
         # Find estimated time for all tasks (# tasks in queue)
         if self.working:
-            return self.task_queue.qsize() +1
+            return self.task_queue.qsize() + 1
         else:
             return self.task_queue.qsize()
 
