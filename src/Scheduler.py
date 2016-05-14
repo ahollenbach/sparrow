@@ -73,7 +73,7 @@ class Scheduler(object):
         """
         # print("Scheduling job")
         self.update_workers()
-
+        self.no_of_workers_per_scheduler = len(self.workers)
         self.in_progress_jobs[job.id] = job
 
         self.method_chosen(job)
