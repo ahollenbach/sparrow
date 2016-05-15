@@ -50,11 +50,19 @@ pyro4-ns -n newyork
 You should launch this
 
 #### B. Scheduler
-Launching the scheduler is really straightforward. Activate your virtual env and execute `python Scheduler.py`.
+Launching the scheduler is really straightforward. Activate your virtual env and execute:
+```bash
+python Scheduler.py
+```
 
 #### C. Workers
 We tested up to 10 workers running in parallel, but the system should be able to handle any number of workers. One assumption we make is that there is only one worker per machine - that is, `arizona` should only have a single worker. This is in order to avoid namespacing issues, and could be rectified, but was low priority. 
-To start a worker, activate your virtual env and run `python Worker.py`. If the scheduler ever goes down, you will have to restart the workers to renew their connection to the scheduler.
+To start a worker, activate your virtual env and run:
+```bash
+python Worker.py
+```
+
+If the scheduler ever goes down, you will have to restart the workers to renew their connection to the scheduler.
 
 #### D. Visualization
 Before you launch any jobs, you probaby want to launch the interface.
@@ -67,7 +75,12 @@ web - directory containing Chart bundle min.js, bootstrap.min.css, index.html, m
 server.py
 ```
 
-To execute, SSH to an RIT server and run `python server.py` this will print out a base address, which you will use to view the interface.
+To execute, SSH to an RIT server and run:
+```bash
+python server.py
+```
+
+This will print out a base address, which you will use to view the interface.
 
 To view the visualization, open your web browser to the server address where `server.py` is running.
 
@@ -78,8 +91,8 @@ For example, if `server.py` is running on `newyork` (`newyork.cs.rit.edu`), go t
 This is where we assign jobs and tasks to the scheduler. To simplify proceedings, we chose to have each task as simply telling
 the worker to sleep for a certain duration of time. Jobs are comprised of tasks, and can be hetero- and homogeneous.
 
-To execute a routine, SSH into an RIT server and run
-```
+To execute a routine, SSH into an RIT server and run:
+```bash
 python SparrowClient.py  <method>  <no_of_jobs>  <no_of_tasks>  <duration>  [task_spread]
 ```
 where,
