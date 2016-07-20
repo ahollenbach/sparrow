@@ -1,5 +1,7 @@
 # Sparrow
-Replicating Sparrow in Python
+This is a proof-of-concept Python replication of several of the features found in [Sparrow](https://github.com/radlab/sparrow), a distributed scheduler. Some stuff may seem oddly specific to the Rochester Institute of Technology, because in fact, this was developed at RIT as part of a computer science course on distributed systems!
+
+Many assumptions were made and as such, the system is very much not robust, so please don't use this in production!
 
 ## 1. Installation
 ### A. Setting up a virtual environment
